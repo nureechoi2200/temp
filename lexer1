@@ -1,0 +1,127 @@
+#include "pch.h"
+#include<iostream>
+#include<vector>
+#include<string>
+
+using namespace std;
+
+int numMLP = 0;
+
+typedef struct token{
+public:
+	int type;
+	int scope;
+	char value[100];
+};
+
+vector<token> tokenTable;
+
+#define SYM_WORD	0   
+#define SYM_NUM		1
+#define SYM_SLP		2   //(
+#define SYM_SRP		3   //)
+#define SYM_MLP		4   //{
+#define SYM_MRP		5   //}
+#define SYM_IF		6
+#define SYM_WHILE	7
+#define SYM_THEN	8
+#define SYM_ELSE	9
+#define SYM_EQL		10   //=
+#define SYM_LC		11   //<
+#define SYM_RC		12   //>
+#define SYM_ADD		13	 //+
+#define SYM_SEMI	14   //;
+
+class Lexer {
+public:
+	int wholeTokenNum = 0;
+	int getNum = 0;
+	int returnType(char c) {//
+		int ci = int(c);
+		if ((ci >= 65 && ci <= 90) | (ci >= 97 && ci <= 122)) return SYM_WORD;
+		else if (ci >= 48 && ci <= 57) return SYM_NUM;
+		else if (ci == 40) return SYM_SLP;
+		else if (ci == 41) return SYM_SRP;
+		else if (ci == 123) return SYM_MLP;
+		else if (ci == 125) return SYM_MRP;
+		else if (ci == 61) return SYM_EQL;
+		else if (ci == 60) return SYM_LC;
+		else if (ci == 62) return SYM_RC;
+		else if (ci == 43) return SYM_ADD;
+		else if (ci == 59) return SYM_SEMI;
+		else return false;
+	}
+
+	void makeToken(const char* c) {
+		token t;
+		strcpy_s(t.value,c);
+		t.scope = numMLP;
+		string s = c;
+		if (s == "if") {
+			t.type = SYM_IF;
+		}
+		else if (s == "while") {
+			t.type = SYM_WHILE;
+		}
+		else if (s == "then") {
+			t.type = SYM_THEN;
+		}
+		else if (s == "else") {
+			t.type = SYM_ELSE;
+		}
+		else {
+			t.type = returnType(c[0]);
+		}
+		tokenTable.push_back(t);
+	}
+
+	void lexerWork(const char* c) {
+		char tok[100] = { 0 };
+		tok[0] = c[0];
+		for (int i = 0; i < strlen(c); i++) {
+			if (c[i] != ' '&&c[i] != '\t'&&c[i] != '\n') {
+				if (c[i] == '}') {
+					numMLP--;
+				}
+				if (returnType(c[i]) == returnType(c[i + 1])) {
+					tok[strlen(tok)] = c[i + 1];
+				}
+				else {
+					makeToken(tok);
+					if (i<strlen(c)-1) {
+						memset(tok, 0, 100 * (sizeof tok[0]));
+						tok[0] = c[i + 1];
+					}
+				}
+			}
+			else {
+				memset(tok, 0, 100 * (sizeof tok[0]));
+				tok[0] = c[i + 1];
+			}
+			if (c[i] == '{') {
+				numMLP++;
+			}
+		}
+	}
+
+	token GetToken() {
+		token a = tokenTable[getNum];
+		getNum++;
+		return a;
+	}
+
+	void printTokenTable() {
+		int s = tokenTable.size();
+		for (int i = 0; i < s; i++) {
+			token a = GetToken();
+			printf("%d번째 토큰: val=%s, type=%d, scope=%d\n", getNum, a.value, a.type, a.scope);
+		}
+	}
+};
+
+int main() {
+	Lexer l;
+	l.lexerWork("aser=3\n if(aser<10){aser=aser+1;}\n else{aser=aser+3}");
+	l.printTokenTable();
+	return 0;
+}
