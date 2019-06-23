@@ -1,3 +1,4 @@
+//코드를 읽어와서 각 토큰을 벡터 tokenList에 집어넣음.
 #include "pch.h"
 #include<iostream>
 #include<vector>
@@ -14,7 +15,7 @@ public:
 	char value[100];
 };
 
-vector<token> tokenTable;
+vector<token> tokenList;
 
 #define SYM_WORD	0   
 #define SYM_NUM		1
@@ -72,7 +73,7 @@ public:
 		else {
 			t.type = returnType(c[0]);
 		}
-		tokenTable.push_back(t);
+		tokenList.push_back(t);
 	}
 
 	void lexerWork(const char* c) {
@@ -105,13 +106,13 @@ public:
 	}
 
 	token GetToken() {
-		token a = tokenTable[getNum];
+		token a = tokenList[getNum];
 		getNum++;
 		return a;
 	}
 
 	void printTokenTable() {
-		int s = tokenTable.size();
+		int s = tokenList.size();
 		for (int i = 0; i < s; i++) {
 			token a = GetToken();
 			printf("%d번째 토큰: val=%s, type=%d, scope=%d\n", getNum, a.value, a.type, a.scope);
